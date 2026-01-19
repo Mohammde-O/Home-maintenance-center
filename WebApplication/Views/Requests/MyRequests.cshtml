@@ -1,0 +1,130 @@
+@model List<HomeRepairHub.Models.Request>
+
+@{
+    ViewData["Title"] = "طلباتي";
+}
+
+<div class="space-y-8">
+    <div class="flex items-center gap-4 border-b border-slate-800 pb-6">
+    <div class="p-3.5 bg-slate-900 rounded-2xl border border-slate-800 text-amber-500 shadow-lg shadow-amber-900/10">
+        <i data-lucide="clipboard-list" class="w-7 h-7"></i>
+    </div>
+    <div>
+        <h2 class="text-2xl font-bold text-white">@(Context.Session.GetString("UserRole") == "Worker" ? "مهام الصيانة الخاصة بي" : "طلباتي السابقة")</h2>
+        <p class="text-slate-400 text-sm mt-1">@(Context.Session.GetString("UserRole") == "Worker" ? "قائمة بجميع طلبات الصيانة التي وافقت على تنفيذها" : "سجل كامل بجميع بلاغات الصيانة التي قدمتها")</p>
+    </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+    <div class="bg-slate-900 rounded-3xl shadow-sm border border-slate-800 p-16 text-center">
+        <h3 class="text-xl font-bold text-slate-200">لا توجد طلبات</h3>
+        <p class="text-slate-500 mt-2">لم تقم بإرسال أي طلبات صيانة حتى الآن.</p>
+    </div>
+    }
+    else
+    {
+    <div class="bg-slate-900 rounded-3xl shadow-xl shadow-black/20 border border-slate-800 overflow-hidden">
+        <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-950 text-slate-400 text-xs uppercase font-bold tracking-wider text-right">
+            <tr>
+                <th class="px-8 py-5">المشكلة</th>
+                @if (Context.Session.GetString("UserRole") == "Worker")
+                {
+                    <th class="px-8 py-5">العميل</th>
+                }
+                <th class="px-8 py-5">الموقع</th>
+                <th class="px-8 py-5">الحالة</th>
+                <th class="px-8 py-5">التاريخ</th>
+                <th class="px-8 py-5 text-left">إجراءات</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+            @foreach (var req in Model)
+            {
+                <tr class="hover:bg-slate-800/50 transition-colors group">
+                <td class="px-8 py-5">
+                    <div class="font-bold text-slate-200 text-base">@req.ProblemType</div>
+                    <div class="text-sm text-slate-500 truncate max-w-xs mt-1">@req.Description</div>
+                    @if (Context.Session.GetString("UserRole") != "Worker" && req.Worker != null)
+                    {
+                        <div class="mt-2 flex items-center gap-1.5 text-[10px] text-blue-400 font-bold bg-blue-500/5 px-2 py-1 rounded-md w-fit">
+                            <i data-lucide="user-check" class="w-3 h-3"></i>
+                            الصناعي: @req.Worker.Name
+                        </div>
+                    }
+                </td>
+                @if (Context.Session.GetString("UserRole") == "Worker")
+                {
+                    <td class="px-8 py-5">
+                        <div class="text-sm text-slate-300 font-medium">@req.User?.Name</div>
+                    </td>
+                }
+                <td class="px-8 py-5">
+                    <div class="flex items-center gap-2 text-sm text-slate-400">
+                    <i data-lucide="map-pin" class="text-slate-600 group-hover:text-amber-500 transition-colors w-4 h-4"></i>
+                    @req.City, @req.Location
+                    </div>
+                </td>
+                <td class="px-8 py-5">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border border-white/5 @GetStatusStyle(req.Status)">
+                    @TranslateStatus(req.Status)
+                    </span>
+                </td>
+                <td class="px-8 py-5">
+                    <div class="flex items-center gap-2 text-sm text-slate-400">
+                        <i data-lucide="calendar" class="text-slate-600 w-4 h-4"></i>
+                        <span dir="ltr">@req.CreatedAt.ToShortDateString()</span>
+                    </div>
+                </td>
+                <td class="px-8 py-5 text-left pl-8">
+                    <div class="flex items-center justify-end gap-3">
+                        @if (Context.Session.GetString("UserRole") == "Worker")
+                        {
+                            <form asp-action="CancelAcceptance" method="post" onsubmit="return confirm('هل أنت متأكد من إلغاء قبول هذا الطلب؟');">
+                                <input type="hidden" name="id" value="@req.Id" />
+                                <button type="submit" class="text-red-400 hover:text-red-300 text-xs font-bold transition-colors">
+                                    إلغاء القبول
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="CancelRequest" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا الطلب؟');">
+                                <input type="hidden" name="id" value="@req.Id" />
+                                <button type="submit" class="text-red-400 hover:text-red-300 text-xs font-bold transition-colors">
+                                    حذف الطلب
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        </div>
+    </div>
+    }
+</div>
+
+@functions {
+    string GetStatusStyle(string status) {
+        return status switch {
+            "Pending" => "bg-amber-500/10 text-amber-400",
+            "Confirmed" => "bg-blue-500/10 text-blue-400",
+            "Completed" => "bg-emerald-500/10 text-emerald-400",
+            _ => "bg-slate-800 text-slate-400"
+        };
+    }
+
+    string TranslateStatus(string status) {
+        return status switch {
+            "Pending" => "قيد الانتظار",
+            "Confirmed" => "تم التأكيد",
+            "Completed" => "مكتمل",
+            _ => status
+        };
+    }
+}

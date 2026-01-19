@@ -1,0 +1,108 @@
+@model HomeRepairHub.Models.User
+
+@{
+    ViewData["Title"] = "تسجيل جديد";
+}
+
+<div class="flex justify-center items-center h-full min-h-[60vh]">
+    <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl shadow-slate-950/50 w-full max-w-md border border-slate-800 relative overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="text-center mb-8 relative z-10">
+            <h2 class="text-3xl font-bold text-white">إنشاء حساب جديد</h2>
+            <p class="text-slate-400 mt-2">انضم إلينا في مركز صيانة المنزل</p>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="mb-6 p-3 bg-red-900/30 text-red-400 text-sm rounded-lg border border-red-500/30">
+                @ViewBag.Error
+            </div>
+        }
+
+        <form asp-action="Register" method="post" class="space-y-5 relative z-10">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">الاسم الكامل</label>
+                <div class="relative">
+                    <i data-lucide="user" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 w-[18px] h-[18px]"></i>
+                    <input asp-for="Name" required placeholder="الاسم الثلاثي"
+                           class="w-full pr-10 pl-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">البريد الإلكتروني</label>
+                <div class="relative">
+                    <i data-lucide="mail" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 w-[18px] h-[18px]"></i>
+                    <input asp-for="Email" required placeholder="name@example.com" dir="ltr"
+                           class="w-full pr-10 pl-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">كلمة المرور</label>
+                <div class="relative">
+                    <i data-lucide="lock" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 w-[18px] h-[18px]"></i>
+                    <input asp-for="Password" type="password" required minlength="6" placeholder="6 أحرف على الأقل" dir="ltr"
+                           class="w-full pr-10 pl-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">نوع الحساب</label>
+                <div class="relative">
+                    <select asp-for="Role" id="RoleSelect" class="w-full pr-4 pl-10 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white appearance-none focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                        <option value="Customer">مستخدم (طلب خدمة)</option>
+                        <option value="Worker">صناعي (تقديم خدمة)</option>
+                    </select>
+                     <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                        <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div id="IndustrySection" class="hidden">
+                <label class="block text-sm font-medium text-slate-300 mb-2">التخصص المهني</label>
+                <div class="relative">
+                    <select asp-for="Industry" class="w-full pr-4 pl-10 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white appearance-none focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+                        <option value="">اختر التخصص...</option>
+                        <option value="كهرباء">كهرباء</option>
+                        <option value="تكييف وتبريد">تكييف وتبريد</option>
+                        <option value="بناء وهيكل">بناء وهيكل</option>
+                        <option value="أجهزة منزلية">أجهزة منزلية</option>
+                        <option value="أخرى">أخرى</option>
+                    </select>
+                     <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                        <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold shadow-lg border border-slate-700 transition-all">
+                تسجيل حساب
+            </button>
+        </form>
+
+        <div class="mt-8 text-center relative z-10">
+            <p class="text-slate-500 text-sm">
+                لديك حساب بالفعل؟
+                <a href="@Url.Action("Login", "Account")" class="text-blue-400 font-semibold hover:text-blue-300 hover:underline transition-colors">
+                    سجل دخولك هنا
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('RoleSelect').addEventListener('change', function() {
+            const industrySection = document.getElementById('IndustrySection');
+            if (this.value === 'Worker') {
+                industrySection.classList.remove('hidden');
+            } else {
+                industrySection.classList.add('hidden');
+            }
+        });
+    </script>
+}

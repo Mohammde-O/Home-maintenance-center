@@ -1,0 +1,128 @@
+@model List<HomeRepairHub.Models.Request>
+
+@{
+    ViewData["Title"] = "الرئيسية";
+}
+
+<div class="space-y-8">
+    <div class="flex justify-between items-end border-b border-slate-800 pb-6">
+    <div>
+        <h2 class="text-3xl font-bold text-white">طلبات المجتمع</h2>
+        <p class="text-slate-400 mt-2">تحديثات فورية لاحتياجات الصيانة</p>
+    </div>
+    <div class="text-sm text-slate-500 font-medium px-3 py-1 bg-slate-900 rounded-full border border-slate-800">
+        عرض @Model.Count @(Model.Count == 1 ? "طلب" : "طلبات")
+    </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+    <div class="text-center py-24 bg-slate-900/50 rounded-3xl shadow-sm border border-dashed border-slate-800">
+        <div class="mx-auto bg-slate-800 p-6 rounded-full w-24 h-24 flex items-center justify-center mb-6 ring-4 ring-slate-800/50">
+        <i data-lucide="wrench" class="text-slate-600 w-10 h-10"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-300">لا توجد طلبات حالياً</h3>
+        <p class="text-slate-500 max-w-sm mx-auto mt-2 leading-relaxed">لم يتم تقديم أي طلبات صيانة حتى الآن. كن أول من يطلب المساعدة!</p>
+    </div>
+    }
+    else
+    {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var req in Model)
+        {
+        <div class="bg-slate-900 rounded-2xl shadow-lg hover:shadow-xl hover:shadow-black/20 transition-all duration-300 overflow-hidden border border-slate-800 flex flex-col group hover:-translate-y-1">
+            <div class="p-6 flex-1">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2.5 bg-slate-800 rounded-xl border border-slate-700/50 group-hover:bg-slate-700 transition-colors">
+                @Html.Raw(GetIconForType(req.ProblemType))
+                </div>
+                <span class="px-3 py-1 rounded-full text-xs font-bold border @GetStatusColor(req.Status)">
+                @TranslateStatus(req.Status)
+                </span>
+            </div>
+            
+            <h3 class="font-bold text-lg text-slate-100 mb-1">@req.ProblemType</h3>
+                <div class="flex flex-col gap-1 mb-4">
+                    <div class="flex items-center text-xs text-slate-500 font-medium">
+                        بواسطة <span class="text-slate-300 mr-1">@req.User?.Name</span>
+                    </div>
+                    @if (req.Worker != null)
+                    {
+                        <div class="flex items-center text-xs text-slate-400 font-bold group">
+                            <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1 text-blue-400"></i>
+                            الصناعي: <span class="text-blue-400 mr-1">@req.Worker.Name</span>
+                        </div>
+                    }
+                </div>
+            
+            <p class="text-slate-400 text-sm mb-5 line-clamp-3 leading-relaxed">
+                @req.Description
+            </p>
+
+            @if (Context.Session.GetString("UserRole") == "Worker")
+            {
+                <div class="mt-auto pt-2 pb-6">
+                    @if (req.Status == "Pending")
+                    {
+                        <form asp-action="Accept" method="post">
+                            <input type="hidden" name="id" value="@req.Id" />
+                            <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl transition-all shadow-md shadow-amber-500/10 hover:shadow-amber-500/25 flex items-center justify-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                قبول هذا الطلب
+                            </button>
+                        </form>
+                    }
+                    else if (req.WorkerId.ToString() == Context.Session.GetString("UserId"))
+                    {
+                        <div class="w-full py-2.5 bg-blue-500/10 text-blue-400 font-bold rounded-xl border border-blue-500/20 flex items-center justify-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            تم تأكيد طلبك للعمل
+                        </div>
+                    }
+                </div>
+            }
+            </div>
+            
+            <div class="px-6 py-4 bg-slate-950/50 border-t border-slate-800 text-xs text-slate-500 flex justify-between items-center">
+            <div class="flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="text-slate-600 group-hover:text-amber-500 transition-colors w-[14px] h-[14px]"></i>
+                <span class="truncate max-w-[120px]">@req.City, @req.Location</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <i data-lucide="clock" class="text-slate-600 w-[14px] h-[14px]"></i>
+                <span dir="ltr">@req.CreatedAt.ToShortDateString()</span>
+            </div>
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>
+
+@functions {
+    string GetStatusColor(string status) {
+        return status switch {
+            "Pending" => "bg-amber-500/10 text-amber-400 border-amber-500/20",
+            "Confirmed" => "bg-blue-500/10 text-blue-400 border-blue-500/20",
+            "Completed" => "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+            _ => "bg-slate-800 text-slate-300"
+        };
+    }
+
+    string TranslateStatus(string status) {
+        return status switch {
+            "Pending" => "قيد الانتظار",
+            "Confirmed" => "تم التأكيد",
+            "Completed" => "مكتمل",
+            _ => status
+        };
+    }
+
+    string GetIconForType(string type) {
+        var t = type.ToLower();
+        if (t.Contains("سباكة") || t.Contains("plumbing")) return "<i data-lucide='droplets' class='text-cyan-400 w-6 h-6'></i>";
+        if (t.Contains("كهرباء") || t.Contains("electricity")) return "<i data-lucide='zap' class='text-amber-400 w-6 h-6'></i>";
+        if (t.Contains("بناء") || t.Contains("structural")) return "<i data-lucide='home' class='text-indigo-400 w-6 h-6'></i>";
+        return "<i data-lucide='wrench' class='text-emerald-400 w-6 h-6'></i>";
+    }
+}

@@ -1,0 +1,56 @@
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+}
+
+<div class="flex justify-center items-center h-full min-h-[60vh]">
+    <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl shadow-slate-950/50 w-full max-w-md border border-slate-800 relative overflow-hidden">
+        <div class="absolute -top-20 -left-20 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="text-center mb-8 relative z-10">
+            <h2 class="text-3xl font-bold text-white">مرحباً بعودتك</h2>
+            <p class="text-slate-400 mt-2">سجل الدخول لإدارة طلبات الصيانة</p>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="mb-6 p-4 bg-red-900/30 border border-red-500/30 text-red-400 flex items-center gap-2 rounded-xl">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                <span class="text-sm font-medium">@ViewBag.Error</span>
+            </div>
+        }
+
+        <form asp-action="Login" method="post" class="space-y-6 relative z-10">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">البريد الإلكتروني</label>
+                <div class="relative">
+                    <i data-lucide="mail" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 w-[18px] h-[18px]"></i>
+                    <input type="email" name="email" required placeholder="name@example.com" dir="ltr"
+                           class="w-full pr-10 pl-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all" />
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">كلمة المرور</label>
+                <div class="relative">
+                    <i data-lucide="lock" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 w-[18px] h-[18px]"></i>
+                    <input type="password" name="password" required placeholder="••••••••" dir="ltr"
+                           class="w-full pr-10 pl-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all" />
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 rounded-xl font-bold shadow-lg shadow-orange-900/20 transition-all transform hover:-translate-y-0.5">
+                تسجيل الدخول
+            </button>
+        </form>
+
+        <div class="mt-8 text-center relative z-10">
+            <p class="text-slate-500 text-sm">
+                ليس لديك حساب؟
+                <a href="@Url.Action("Register", "Account")" class="text-amber-500 font-semibold hover:text-amber-400 hover:underline transition-colors">
+                    أنشئ حساباً هنا
+                </a>
+            </p>
+        </div>
+    </div>
+</div>

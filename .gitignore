@@ -1,0 +1,22 @@
+# Visual Studio
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# SQLite
+*.db-shm
+*.db-wal
+
+# Common Logs
+*.log
+
+# Sensitive info
+appsettings.Development.json

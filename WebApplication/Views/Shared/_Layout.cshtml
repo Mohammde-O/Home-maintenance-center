@@ -1,0 +1,100 @@
+﻿@{
+    var userId = Context.Session.GetString("UserId");
+    var userName = Context.Session.GetString("UserName");
+    var isLoggedIn = !string.IsNullOrEmpty(userId);
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مركز صيانة المنزل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@200;300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+             <a href="@Url.Action("Index", "Requests")" class="flex items-center gap-3 cursor-pointer group">
+                <div class="p-2.5 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shadow-orange-500/20 group-hover:shadow-orange-500/40 transition-all duration-300">
+                    <i data-lucide="wrench" class="text-white w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white group-hover:text-amber-400 transition-colors">مركز صيانة المنزل</h1>
+                    <p class="text-xs text-slate-400">إدارة طلبات الصيانة بذكاء</p>
+                </div>
+             </a>
+
+             <nav class="flex items-center gap-2 md:gap-6">
+                @if (isLoggedIn)
+                {
+                    <a href="@Url.Action("Index", "Requests")" class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all @(currentController == "Requests" && currentAction == "Index" ? "bg-slate-800 text-amber-400" : "text-slate-400 hover:bg-slate-800 hover:text-slate-200")">
+                        <i data-lucide="home" class="w-[18px] h-[18px]"></i>
+                        <span class="hidden md:inline font-medium">الرئيسية</span>
+                    </a>
+
+                    <a href="@Url.Action("MyRequests", "Requests")" class="flex items-center gap-2 px-3 py-2 rounded-lg transition-all @(currentAction == "MyRequests" ? "bg-slate-800 text-amber-400" : "text-slate-400 hover:bg-slate-800 hover:text-slate-200")">
+                        <i data-lucide="list" class="w-[18px] h-[18px]"></i>
+                        <span class="hidden md:inline font-medium">@(Context.Session.GetString("UserRole") == "Worker" ? "مهامي" : "طلباتي")</span>
+                    </a>
+
+                    @if (Context.Session.GetString("UserRole") != "Worker")
+                    {
+                        <a href="@Url.Action("Create", "Requests")" class="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-full transition-all shadow-md shadow-amber-500/20 hover:shadow-amber-500/40 transform hover:-translate-y-0.5 @(currentAction == "Create" ? "ring-2 ring-white ring-offset-2 ring-offset-slate-900" : "")">
+                            <i data-lucide="plus-circle" class="w-[18px] h-[18px]"></i>
+                            <span class="hidden md:inline font-bold">طلب جديد</span>
+                        </a>
+                    }
+
+                    <div class="h-6 w-px bg-slate-800 mx-2"></div>
+
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2 text-sm text-slate-300 bg-slate-800/50 py-1.5 px-3 rounded-full border border-slate-700/50">
+                            <i data-lucide="user" class="text-amber-500 w-[14px] h-[14px]"></i>
+                            <span class="hidden md:inline font-medium">@userName</span>
+                        </div>
+                        <a href="@Url.Action("Logout", "Account")" class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-full transition-colors" title="تسجيل الخروج">
+                            <i data-lucide="log-out" class="w-5 h-5 rtl:rotate-180"></i>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="flex gap-4">
+                        <a href="@Url.Action("Login", "Account")" class="text-sm font-medium hover:text-amber-400 transition-colors @(currentAction == "Login" ? "text-amber-400" : "text-slate-300")">
+                            دخول
+                        </a>
+                        <a href="@Url.Action("Register", "Account")" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition-colors border border-slate-700">
+                            حساب جديد
+                        </a>
+                    </div>
+                }
+             </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 container mx-auto px-4 py-10 max-w-6xl">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-center text-slate-500 text-sm">
+        <p>&copy; @DateTime.Now.Year مركز صيانة المنزل. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
